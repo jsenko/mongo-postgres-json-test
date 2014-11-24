@@ -13,11 +13,11 @@ except:
 cur = conn.cursor()
 
 cur.execute('TRUNCATE json_data CASCADE')
-query =  "INSERT INTO json_data (id, data) values (%s, %s);"
+query =  "INSERT INTO json_data (data) values ({});"
 n = 1000
 for i in range(n):
-	data = (str(i), '{"name": "Apple Phone", "type": "phone"}')
-	cur.execute(query, data)
+	data = '\'{"name": "Apple Phone", "type": "phone"}\''
+	cur.execute(query.format(data))
 
 start = time.time()
 conn.commit()
@@ -32,6 +32,7 @@ collection.remove()
 
 start = time.time()
 
+data = ""
 for i in range(n):
 	collection.insert({"name": "James", "surname": "Bond"})
 
