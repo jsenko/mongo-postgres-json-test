@@ -40,6 +40,7 @@ end = time.time()
 print 'Commit %d inserts into postgres with jsonb took %0.3f ms' % (n, (end-start)*1000.0)
 
 #mongo
+#mongo - separate insert
 
 client = MongoClient()
 collection = client.test.test
@@ -48,12 +49,23 @@ collection.remove()
 
 start = time.time()
 
-data = ""
 for i in range(n):
 	collection.insert({"name": "Apple Phone", "type": "phone"})
 
 end = time.time()
 print '%d inserts in Mongo took %0.3f ms' % (n, (end-start)*1000.0)
+
+#mongo - block insert as an array
+
+collection.remove()
+data = []
+for i in range(n):
+	data.append({"name": "Apple Phone", "type": "phone"})
+
+start = time.time()
+collection.insert(data)
+end = time.time()
+print 'Commit %d documents in Mongo took %0.3f ms' % (n, (end-start)*1000.0)
 
 print
 print "End of the script"
