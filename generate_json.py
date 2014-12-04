@@ -382,4 +382,4 @@ def generate_all():
 
 
 
-print generate_all()
+#print generate_all()
