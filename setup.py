@@ -1,4 +1,4 @@
-__author__ = 'jsenko'
+__author__ = 'Jakub Senko'
 
 from connection import get_postgres_connection, get_mongo_client
 
@@ -6,38 +6,50 @@ setup_queries = [
 
     "CREATE EXTENSION IF NOT EXISTS hstore",  # PACKAGE postresql94-contrib REQUIRED!
 
-    #"CREATE SEQUENCE json_table_id_seq START 1",
+    "CREATE EXTENSION IF NOT EXISTS btree_gin",
 
-    #"CREATE SEQUENCE jsonb_table_id_seq START 1",
-
-    #"CREATE SEQUENCE hstore_table_id_seq START 1",
-
-    """ CREATE TABLE json_table (
-            id integer PRIMARY KEY,
-            data JSON
-        )
-    """, #DEFAULT nextval('json_table_id_seq')
-
-    """ CREATE TABLE jsonb_table (
-            id integer PRIMARY KEY,
-            data JSONB
-        )
-    """,
+    "CREATE EXTENSION IF NOT EXISTS btree_gist",
 
     """ CREATE TABLE hstore_table (
             id integer PRIMARY KEY,
             data hstore
         )
+    """,
+
+    """ CREATE TABLE json_table (
+            id integer PRIMARY KEY,
+            data JSON
+        )
+    """,
+
+    """ CREATE TABLE jsonb_table (
+            id integer PRIMARY KEY,
+            data JSONB
+        )
     """
 ]
 
+
+
 cleanup_queries = [
-    "DROP TABLE IF EXISTS hstore_table",
+
+ #   "DROP TABLE IF EXISTS jsonb_table_gist",
+
+#    "DROP TABLE IF EXISTS jsonb_table_gin",
+
     "DROP TABLE IF EXISTS jsonb_table",
+
+  #  "DROP TABLE IF EXISTS json_table_gist",
+
+   # "DROP TABLE IF EXISTS json_table_gin",
+
     "DROP TABLE IF EXISTS json_table",
-    #"DROP SEQUENCE IF EXISTS hstore_table_id_seq", MANUALLY
-    #"DROP SEQUENCE IF EXISTS jsonb_table_id_seq",
-    #"DROP SEQUENCE IF EXISTS json_table_id_seq"
+
+    #"DROP TABLE IF EXISTS hstore_table_gist",
+
+    #"DROP TABLE IF EXISTS hstore_table_gin",
+
+    "DROP TABLE IF EXISTS hstore_table",
 ]
 
 

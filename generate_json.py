@@ -1,4 +1,4 @@
-__author__ = 'jsenko'
+__author__ = 'Jakub Senko'
 
 from random import randrange, choice
 
