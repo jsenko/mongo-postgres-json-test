@@ -76,10 +76,13 @@ def setup_gin(con):
                                            + setup_function
                                            + queries_setup_gin)
     client = get_mongo_client()
-    for id in range(20):
+    for id in range(20): # just 20 for now
         json = generate_all()
         with con.cursor() as cur:
             # print json
+            # The following is because hstore DOES NOT support
+            # json syntax and arrays, so the data must be pruned and edited.
+            # The result is a root key-value document WITHOUT nested elements.
             foo = json[1:json.find("\"manufactured\"")].replace("{", "").replace("}", "").replace(":", "=>") + "\"last\"=>\"\""
             # print foo
             cur.execute("INSERT INTO hstore_table (id, data) values (%s, '%s')"

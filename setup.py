@@ -59,4 +59,4 @@ def cleanup(con):
 
 #setup(get_postgres_connection())
 
-cleanup(get_postgres_connection())
+# cleanup(get_postgres_connection())
