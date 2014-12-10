@@ -25,7 +25,7 @@ json_manufactured = """
 json_owner = """
 {
     "name": "%s",
-    "address": "%s",
+    "address": "%s"
 }
 """
 
@@ -377,7 +377,7 @@ def generate_owners_list():
 
 
 def generate_all():
-    return json_root % (generate_name(1, 4).upper() + " "+ str(randrange(1, 10)),
+    return json_root % (generate_name(1, 1).upper() + " "+ str(randrange(1, 10)),
                         choice(colors), generate_manufactured(), generate_owners_list())
 
 

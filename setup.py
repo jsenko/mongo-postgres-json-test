@@ -33,21 +33,9 @@ setup_queries = [
 
 cleanup_queries = [
 
- #   "DROP TABLE IF EXISTS jsonb_table_gist",
-
-#    "DROP TABLE IF EXISTS jsonb_table_gin",
-
     "DROP TABLE IF EXISTS jsonb_table",
 
-  #  "DROP TABLE IF EXISTS json_table_gist",
-
-   # "DROP TABLE IF EXISTS json_table_gin",
-
     "DROP TABLE IF EXISTS json_table",
-
-    #"DROP TABLE IF EXISTS hstore_table_gist",
-
-    #"DROP TABLE IF EXISTS hstore_table_gin",
 
     "DROP TABLE IF EXISTS hstore_table",
 ]
@@ -71,4 +59,4 @@ def cleanup(con):
 
 #setup(get_postgres_connection())
 
-#cleanup(get_postgres_connection())
+cleanup(get_postgres_connection())

@@ -89,9 +89,9 @@ index_queries_gin = [
 
     "CREATE INDEX hstore_gin ON hstore_table USING gin(data)",
 
-    "CREATE INDEX json_gin ON json_table USING gin((data#>>'{country}'))",
+    "CREATE INDEX json_gin ON json_table USING gin((data#>>'{date}'))",
 
-    "CREATE INDEX jsonb_gin ON jsonb_table USING gin((data#>>'{country}'))"
+    "CREATE INDEX jsonb_gin ON jsonb_table USING gin((data#>>'{date}'))"
 ]
 
 
@@ -112,9 +112,9 @@ index_queries_gist = [
 
     "CREATE INDEX hstore_gist ON hstore_table USING gist(data)",
 
-    "CREATE INDEX json_gist ON json_table USING gist((data#>>'{country}'))",
+    "CREATE INDEX json_gist ON json_table USING gist((data#>>'{date}'))",
 
-    "CREATE INDEX jsonb_gist ON jsonb_table USING gist((data#>>'{country}'))"
+    "CREATE INDEX jsonb_gist ON jsonb_table USING gist((data#>>'{date}'))"
 ]
 
 
@@ -124,7 +124,7 @@ def test3():
     cleanup(get_postgres_connection())
     setup(get_postgres_connection())
     run_queries(get_postgres_connection(), index_queries_gist)
-    get_mongo_client().test.test.ensure_index("country")
+    get_mongo_client().test.test.ensure_index("date")
     results = [0.0, 0.0, 0.0, 0.0]
     test_base(1000, results)
     print "test 3 - insert with GIST (+mongo index): ", results
