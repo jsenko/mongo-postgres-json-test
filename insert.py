@@ -23,7 +23,7 @@ def run_hstore(con, id, json):
         cur.execute("INSERT INTO hstore_table (id, data) values (%s, '%s')"
             % (id, json.replace("{", "").replace("}", "").replace(":", "=>"))
         )
-    con.commit()
+    #con.commit()
     return (time.time() - start) * 1000.0
 
 
@@ -32,7 +32,7 @@ def run_json(con, id, json):
     start = time.time()
     with con.cursor() as cur:
         cur.execute("INSERT INTO json_table (id, data) values (%s, '%s')" % (id, json))
-    con.commit()
+    #con.commit()
     return (time.time() - start) * 1000.0
 
 
@@ -41,7 +41,7 @@ def run_jsonb(con, id, json):
     start = time.time()
     with con.cursor() as cur:
         cur.execute("INSERT INTO jsonb_table (id, data) values (%s, '%s')" % (id, json))
-    con.commit()
+    #con.commit()
     return (time.time() - start) * 1000.0
 
 
@@ -61,15 +61,15 @@ def test_base(n, times):
 
         con = get_postgres_connection()
         times[0] += run_hstore(con, i, json)
-        #con.commit()
+        con.commit()
 
         con = get_postgres_connection()
         times[1] += run_json(con, i, json)
-        #con.commit()
+        con.commit()
 
         con = get_postgres_connection()
         times[2] += run_jsonb(con, i, json)
-        #con.commit()
+        con.commit()
 
         client = get_mongo_client()
         times[3] += run_mongo(client, i, json)
