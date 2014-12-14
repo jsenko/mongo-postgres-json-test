@@ -12,7 +12,7 @@ from generate_json import generate_all
 
 """
     1. select by ID, in postgres this is a separate column
-    2. exact field not nested - name
+    2. exact field not nested - color
     3. exact fields nested, with AND, manufacturer company and country
     4. count owners
     5. fulltext - all cars with owners in some country (address)
@@ -35,8 +35,13 @@ setup_function = [
 
 queries_setup_gin = [
     # GIN
+    "DROP INDEX IF EXISTS json_gin_color",
+    "DROP INDEX IF EXISTS jsonb_gin_color",
 
     "CREATE INDEX hstore_gin ON hstore_table USING gin(data)",
+
+    "CREATE INDEX json_gin_color ON json_table USING gin ((data->>'color'))",
+    "CREATE INDEX jsonb_gin_color ON jsonb_table USING gin ((data->>'color'))",
 
     "CREATE INDEX json_gin_company ON json_table USING gin((data#>>'{manufactured, company}'))",
     "CREATE INDEX jsonb_gin_company ON jsonb_table USING gin((data#>>'{manufactured, company}'))",
@@ -58,15 +63,18 @@ queries_setup_gist = [
     "CREATE INDEX jsonb_gist_company ON jsonb_table USING gist((data#>>'{manufactured, company}'))",
 
     "CREATE INDEX json_gist_country ON json_table USING gist((data#>>'{manufactured, country}'))",
-    "CREATE INDEX jsonb_gist_country ON jsonb_table USING gist((data#>>'{manufactured, country}'))"
+    "CREATE INDEX jsonb_gist_country ON jsonb_table USING gist((data#>>'{manufactured, country}'))",
 
     "CREATE INDEX json_gist_address ON json_table USING gist(json_val_arr(data#>>'{owners}', 'address'))",
     "CREATE INDEX jsonb_gist_address ON jsonb_table USING gist(json_val_arr(data#>>'{owners}', 'address'))"
 ]
 
+def setup_mongo_indexes(client):
+    client.test.test.drop_indexes()
+    client.test.test.ensure_index("color")
+    #client.test.test.ensure_index("{manufactured: {company}}")
 
-
-def setup_gin(con):
+def setup_data_and_indexes(con):
     cleanup(get_postgres_connection())
     """
         setup indexes, then
@@ -76,7 +84,9 @@ def setup_gin(con):
                                            + setup_function
                                            + queries_setup_gin)
     client = get_mongo_client()
-    for id in range(20): # just 20 for now
+    setup_mongo_indexes(client)
+
+    for id in range(1000):
         json = generate_all()
         with con.cursor() as cur:
             # print json
@@ -90,12 +100,11 @@ def setup_gin(con):
             )
             cur.execute("INSERT INTO json_table (id, data) values (%s, '%s')" % (id, json))
             cur.execute("INSERT INTO jsonb_table (id, data) values (%s, '%s')" % (id, json))
-    con.commit()
-    json = json.replace("{", '{ "_id" : ' + str(id) + ",")
-    json = eval(json)  # pymongo wants python dict
-    client.test.test.insert(json)
 
-
+            json = json.replace("{", '{ "_id" : ' + str(id) + ",")
+            json = eval(json)  # pymongo wants python dict
+            client.test.test.insert(json)
+    con.commit()  
 
 class Result:
     data = None
@@ -103,7 +112,7 @@ class Result:
 
 
 
-def postgres_select(con):
+def postgres_simple_select(con):
     result = Result()
     start = time.time()
     with con.cursor() as cur:
@@ -112,13 +121,54 @@ def postgres_select(con):
     result.time = (time.time() - start) * 1000.0
     return result
 
+def postgres_select(con, query):
+    result = Result()
+    start = time.time()
+    with con.cursor() as cur:
+        cur.execute(query)
+        result.data = cur.fetchall()
+    result.time = (time.time() - start) * 1000.0
+    return result
 
+def mongo_simple_select(client):
+    result = Result()
+    start = time.time()
+    result.data = client.test.test.find_one()
+    result.time = (time.time() - start) * 1000.0
+    return result
+
+def mongo_select(client):
+    result = Result()
+    start = time.time()
+    result.data = client.test.test.find({"color": "green"})
+    result.time = (time.time() - start) * 1000.0
+    return result
+
+def print_statistics():
+    cur = get_postgres_connection().cursor()
+    cur.execute("SELECT count(*) FROM json_table;")
+    print "Documents number, postg: " + str(cur.fetchall())
+    print "Documents number, mongo: " + str(get_mongo_client().test.test.count());
+    print ""
 
 def simple_select():
-    result = postgres_select(get_postgres_connection())
-    print result.data, result.time
+    result = postgres_simple_select(get_postgres_connection())
+    print "Simple select postg: ", result.time
+    result = mongo_simple_select(get_mongo_client())
+    print "Simple select mongo: ", result.time
+
+def simple_index_select():
+    print ""
+    query = "SELECT data FROM json_table WHERE data->>'color' = 'green';"
+    result = postgres_select(get_postgres_connection(), query)
+    print "Select with simple index postg: ", result.time
+    result = mongo_select(get_mongo_client())
+    print "Simple with simple index mongo: ", result.time
 
 
 
-setup_gin(get_postgres_connection())
+
+setup_data_and_indexes(get_postgres_connection())
+print_statistics()
 simple_select()
+simple_index_select()
